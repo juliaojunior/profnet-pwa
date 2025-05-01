@@ -1,0 +1,11 @@
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/home": "pages/home.js",
+  "/gerador": "pages/gerador.js",
+  "/profile": "pages/profile.js",
+  "/api/gerar": "pages/api/gerar.js",
+  "/api/gerar-doc": "pages/api/gerar-doc.js",
+  "/login": "pages/login.js"
+}

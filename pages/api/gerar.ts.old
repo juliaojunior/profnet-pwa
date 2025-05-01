@@ -1,0 +1,37 @@
+// pages/api/gerar.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { PassThrough } from 'stream';
+import OpenAI from 'openai';
+
+export const config = { runtime: 'edge', stream: 'both' };   // habilita streaming
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') return res.status(405).end('Only POST');
+  const { prompt } = req.body;
+  if (!prompt) return res.status(400).end('Prompt ausente');
+
+  const stream = new PassThrough();
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Transfer-Encoding', 'chunked');
+  stream.pipe(res);                // devolve o stream imediatamente
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',      // troque por gpt-4.* se já tiver créditos
+      stream: true,                // <<< STREAM
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 1000,
+    });
+
+    for await (const part of completion) {
+      stream.write(part.choices[0]?.delta?.content || '');
+    }
+    stream.end();
+  } catch (e) {
+    console.error(e);
+    stream.end('❌ Erro ao gerar conteúdo.');
+  }
+}

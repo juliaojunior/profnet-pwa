@@ -1,0 +1,242 @@
+// pages/gerador.tsx
+import React, { useState } from 'react';
+import { useRouter } from 'next/router';
+import styled from 'styled-components';
+import { theme } from '../styles/theme';
+import { Layout } from '../components/Layout';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+
+const Container = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${theme.spacing.lg};
+`;
+const Title = styled.h1`
+  text-align: center;
+  font-family: ${theme.fonts.heading};
+  font-size: 2rem;
+  color: ${theme.colors.primary};
+  margin-bottom: ${theme.spacing.lg};
+`;
+const Card = styled.div`
+  background: white;
+  border-radius: ${theme.rounded.lg};
+  box-shadow: ${theme.shadows.md};
+  overflow: hidden;
+  margin-bottom: ${theme.spacing.lg};
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-4px); }
+`;
+const CardHeader = styled.div`
+  background: ${theme.colors.primary};
+  padding: ${theme.spacing.md};
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+`;
+const CardTitle = styled.span`
+  font-size: 1.25rem;
+  font-weight: 600;
+`;
+const CardBody = styled.div<{ expanded: boolean }>`
+  padding: ${({ expanded }) => (expanded ? theme.spacing.md : '0')} ;
+  max-height: ${({ expanded }) => (expanded ? '1000px' : '0')};
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+`;
+const Label = styled.label`
+  display: block;
+  font-weight: 500;
+  margin-bottom: ${theme.spacing.sm};
+`;
+const Select = styled.select`
+  width: 100%;
+  padding: ${theme.spacing.sm};
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background: #F7FAFC;
+  font-size: 1rem;
+`;
+const Input = styled.input`
+  width: 100%;
+  padding: ${theme.spacing.sm};
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background: #F7FAFC;
+  font-size: 1rem;
+`;
+const TextArea = styled.textarea`
+  width: 100%;
+  padding: ${theme.spacing.sm};
+  border: 1px solid #E2ECF0;
+  border-radius: 8px;
+  background: #F7FAFC;
+  resize: vertical;
+  min-height: 80px;
+  font-size: 1rem;
+`;
+const Button = styled.button`
+  background: ${theme.colors.secondary};
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: ${theme.colors.primary}; }
+`;
+
+export default function GeradorPage() {
+  const router = useRouter();
+  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
+    tipo: true,
+    detalhes: false,
+    publico: false,
+    conteudos: false,
+    estrategias: false,
+  });
+  const [tipo, setTipo] = useState('Plano de Aula');
+  const [form, setForm] = useState({
+    titulo: '', objetivo: '', publico: '', disciplina: '',
+    conteudos: '', recursos: '', estrategias: '', avaliacao: '', observacoes: ''
+  });
+  const [resultado, setResultado] = useState('');
+
+  const tipos = ['Plano de Aula', 'Plano de Curso', 'Lista de Exercícios', 'Projeto Pedagógico'];
+
+  const handleChange = (e: React.ChangeEvent<any>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+  const toggleSection = (key: string) => {
+    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const gerar = async () => {
+    const { titulo, objetivo, publico, disciplina, conteudos, recursos, estrategias, avaliacao, observacoes } = form;
+    const prompt = `Comporte-se como um especialista em educação, um professor com 30 anos de experiência. Preciso que você prepare um ${tipo} bem detalhado. Use as informações a seguir para elaborar ${tipo}.
+Tema: ${titulo}
+Objetivo: ${objetivo}
+Público: ${publico}
+Disciplina: ${disciplina}
+Conteúdos: ${conteudos}
+Recursos: ${recursos}
+Estratégias: ${estrategias}
+Avaliação: ${avaliacao}
+Observações: ${observacoes}`;
+
+    console.log('📤 Iniciando chamada à API');
+    setResultado('⏳ Gerando conteúdo com IA...');
+    try {
+      const resposta = await fetch('/api/gerar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      console.log('🔁 Status da resposta:', resposta.status);
+      const data = await resposta.json();
+      console.log('📨 Payload retornado da API:', data);
+      setResultado(data.resultado || '❌ Erro ao gerar conteúdo.');
+    } catch (e: any) {
+      console.error('🚨 Erro dentro do gerar():', e);
+      setResultado('❌ Erro ao gerar conteúdo: ' + (e.message || e.toString()));
+    }
+  };
+
+  return (
+    <Layout>
+      <Container>
+        <Title>🧠 Gerador de Conteúdo AI</Title>
+        {/* Seções em cards */}
+        <Card>
+          <CardHeader onClick={() => toggleSection('tipo')}>
+            <CardTitle>Tipo de Conteúdo: {tipo}</CardTitle>
+            {expandedSections.tipo ? <FaChevronUp /> : <FaChevronDown />}
+          </CardHeader>
+          <CardBody expanded={expandedSections.tipo}>
+            <Select name="tipo" value={tipo} onChange={e => setTipo(e.target.value)}>
+              {tipos.map(t => <option key={t}>{t}</option>)}
+            </Select>
+          </CardBody>
+        </Card>
+        <Card>
+          <CardHeader onClick={() => toggleSection('detalhes')}>
+            <CardTitle>Detalhes Básicos</CardTitle>
+            {expandedSections.detalhes ? <FaChevronUp /> : <FaChevronDown />}
+          </CardHeader>
+          <CardBody expanded={expandedSections.detalhes}>
+            <Label>Título ou Tema</Label>
+            <Input name="titulo" value={form.titulo} onChange={handleChange} placeholder="Título ou Tema" />
+            <Label>Objetivo Geral</Label>
+            <TextArea name="objetivo" value={form.objetivo} onChange={handleChange} placeholder="Objetivo Geral" />
+          </CardBody>
+        </Card>
+        <Card>
+          <CardHeader onClick={() => toggleSection('publico')}>
+            <CardTitle>Público e Disciplina</CardTitle>
+            {expandedSections.publico ? <FaChevronUp /> : <FaChevronDown />}
+          </CardHeader>
+          <CardBody expanded={expandedSections.publico}>
+            <Label>Público-alvo</Label>
+            <Input name="publico" value={form.publico} onChange={handleChange} placeholder="Público-alvo" />
+            <Label>Disciplina</Label>
+            <Input name="disciplina" value={form.disciplina} onChange={handleChange} placeholder="Disciplina" />
+          </CardBody>
+        </Card>
+        <Card>
+          <CardHeader onClick={() => toggleSection('conteudos')}>
+            <CardTitle>Conteúdos e Recursos</CardTitle>
+            {expandedSections.conteudos ? <FaChevronUp /> : <FaChevronDown />}
+          </CardHeader>
+          <CardBody expanded={expandedSections.conteudos}>
+            <Label>Conteúdos</Label>
+            <TextArea name="conteudos" value={form.conteudos} onChange={handleChange} placeholder="Conteúdos a abordar" />
+            <Label>Recursos</Label>
+            <TextArea name="recursos" value={form.recursos} onChange={handleChange} placeholder="Recursos didáticos" />
+          </CardBody>
+        </Card>
+        <Card>
+          <CardHeader onClick={() => toggleSection('estrategias')}>
+            <CardTitle>Estratégias e Avaliação</CardTitle>
+            {expandedSections.estrategias ? <FaChevronUp /> : <FaChevronDown />}
+          </CardHeader>
+          <CardBody expanded={expandedSections.estrategias}>
+            <Label>Estratégias</Label>
+            <TextArea name="estrategias" value={form.estrategias} onChange={handleChange} placeholder="Estratégias de ensino" />
+            <Label>Avaliação</Label>
+            <TextArea name="avaliacao" value={form.avaliacao} onChange={handleChange} placeholder="Avaliação" />
+            <Label>Observações</Label>
+            <TextArea name="observacoes" value={form.observacoes} onChange={handleChange} placeholder="Observações adicionais" />
+          </CardBody>
+        </Card>
+        <div style={{ textAlign: 'center', marginTop: theme.spacing.lg }}>
+          <Button onClick={gerar}>🤖 Gerar Conteúdo</Button>
+        </div>
+        {resultado && (
+          <Card style={{ marginTop: theme.spacing.lg }}>
+            <CardBody expanded>
+              <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{resultado}</pre>
+            </CardBody>
+          </Card>
+        )}
+      </Container>
+    </Layout>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

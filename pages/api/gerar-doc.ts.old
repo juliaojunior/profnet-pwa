@@ -1,0 +1,24 @@
+// pages/api/gerar-doc.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { Document, Packer, Paragraph, HeadingLevel } from 'docx';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { titulo = 'Conteudo', corpo = '' } = req.body as { titulo: string; corpo: string };
+
+  const parags = corpo.split('\n').map(l =>
+    l.trim().startsWith('#')
+      ? new Paragraph({ text: l.replace(/^#+\s*/, ''), heading: HeadingLevel.HEADING_1 })
+      : new Paragraph(l),
+  );
+
+  const doc = new Document({
+    sections: [{ children: [new Paragraph({ text: titulo, heading: HeadingLevel.TITLE }), ...parags] }],
+  });
+
+  const buffer = await Packer.toBuffer(doc);
+  res.setHeader('Content-Type',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  res.setHeader('Content-Disposition',
+    `attachment; filename=${encodeURIComponent(titulo)}.docx`);
+  res.end(buffer);
+}
