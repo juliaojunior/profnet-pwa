@@ -2,9 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/login": "pages/login.js",
   "/home": "pages/home.js",
-  "/noticias": "pages/noticias.js",
-  "/gerador": "pages/gerador.js",
-  "/mensagens": "pages/mensagens.js",
-  "/login": "pages/login.js"
+  "/mensagens": "pages/mensagens.js"
 }

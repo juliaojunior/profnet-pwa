@@ -20,11 +20,6 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/gerador": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/gerador.js"
-    ],
     "/home": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
@@ -39,11 +34,6 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/mensagens.js"
-    ],
-    "/noticias": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/noticias.js"
     ]
   },
   "ampFirstPages": []
