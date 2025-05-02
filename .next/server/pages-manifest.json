@@ -2,8 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/api/gerar": "pages/api/gerar.js",
   "/login": "pages/login.js",
-  "/profile": "pages/profile.js",
   "/gerador": "pages/gerador.js",
-  "/mensagens": "pages/mensagens.js"
+  "/home": "pages/home.js"
 }
